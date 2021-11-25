@@ -13,12 +13,12 @@ namespace Gasmon
         private static readonly AWSCredentials Credentials = new BasicAWSCredentials(Environment.GetEnvironmentVariable("accessKey"),
             Environment.GetEnvironmentVariable("secretKey"));
 
-        private static readonly string topicArn = "arn:aws:sns:eu-west-1:552908040772:EventProcessing-SWApprentices2021-snsTopicSensorDataPart1-DF8ZTFFN636Z";
+        private const string TopicArn = "arn:aws:sns:eu-west-1:552908040772:EventProcessing-SWApprentices2021-snsTopicSensorDataPart1-DF8ZTFFN636Z";
 
         private static async Task Main(string[] args)
         {
-            await GetS3Information();
             await UpdateQueue();
+            await GetS3Information();
         }
 
         private static async Task GetS3Information()
@@ -44,13 +44,13 @@ namespace Gasmon
 
             var createQueueResponse = Queue.CreateQueue(sqsClient);
             var queueUrl = createQueueResponse.QueueUrl;
-            await snsClient.SubscribeQueueAsync(topicArn, sqsClient, queueUrl);
-            
+            await snsClient.SubscribeQueueAsync(TopicArn, sqsClient, queueUrl);
             
             await Notifications.GetCurrentMessages(sqsClient, queueUrl);
-            Thread.Sleep(TimeSpan.FromSeconds(10));
+            Thread.Sleep(TimeSpan.FromSeconds(1));
             await Queue.DeleteCurrentQueue(sqsClient, queueUrl);
         }
+        
 
     }
 }

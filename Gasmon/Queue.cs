@@ -13,11 +13,11 @@ namespace Gasmon
         
         public static CreateQueueResponse CreateQueue(AmazonSQSClient sqsClient)
         {
-            var createQueueResponse = sqsClient.CreateQueueAsync(new CreateQueueRequest
+            return sqsClient.CreateQueueAsync(new CreateQueueRequest
             {
-                QueueName = "beskra-locations-queue"
+                QueueName = "beskra1-locations-queue"
             }).Result;
-            return createQueueResponse;
+            
         }
     }
 }
