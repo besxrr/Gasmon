@@ -47,13 +47,16 @@ namespace Gasmon
             
             var createQueueResponse = sqsClient.CreateQueueAsync(new CreateQueueRequest
             {
-                QueueName = "beskraa-locations-queue"
+                QueueName = "beskra-locations-queue"
             }).Result;
             var queueUrl = createQueueResponse.QueueUrl;
             await snsClient.SubscribeQueueAsync(topicArn, sqsClient, queueUrl);
             
             
-            var messageResponse =sqsClient.ReceiveMessageAsync(queueUrl).Result;
+            var messageResponse = await sqsClient.ReceiveMessageAsync(queueUrl);
+            //If duplicate was a problem could add list to add all messages currently received, filter out that list using 
+            //the distinct method and then when clearing out the queue also wipe the contents of the lists.
+
 
             foreach (var message in messageResponse.Messages)
             {
