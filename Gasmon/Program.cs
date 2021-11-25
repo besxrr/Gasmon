@@ -18,7 +18,7 @@ namespace Gasmon
 {
     class Program
     {
-        public static AWSCredentials Credentials = new BasicAWSCredentials(Environment.GetEnvironmentVariable("accessKey"),
+        private static AWSCredentials Credentials = new BasicAWSCredentials(Environment.GetEnvironmentVariable("accessKey"),
             Environment.GetEnvironmentVariable("secretKey"));
         static async Task Main(string[] args)
         {
@@ -35,6 +35,7 @@ namespace Gasmon
 
             using var objectReader = new StreamReader(objectResponse.ResponseStream);
             var jsonResponse = await objectReader.ReadToEndAsync();
+            
             JsonConvert.DeserializeObject<List<Location>>(jsonResponse);
         }
 
@@ -46,14 +47,24 @@ namespace Gasmon
             
             var createQueueResponse = sqsClient.CreateQueueAsync(new CreateQueueRequest
             {
-                QueueName = "beskra-locations-queue"
+                QueueName = "beskraa-locations-queue"
             }).Result;
             var queueUrl = createQueueResponse.QueueUrl;
             await snsClient.SubscribeQueueAsync(topicArn, sqsClient, queueUrl);
+            
+            
+            var messageResponse =sqsClient.ReceiveMessageAsync(queueUrl).Result;
+
+            foreach (var message in messageResponse.Messages)
+            {
+                var messageBody = JsonConvert.DeserializeObject<MessageBody>(message.Body);
+                if (messageBody?.Message != null)
+                {
+                    JsonConvert.DeserializeObject<MessageFromBody>(messageBody.Message);
+                }
+            }
             Thread.Sleep(TimeSpan.FromSeconds(10));
             await sqsClient.DeleteQueueAsync(queueUrl);
         }
-        
-        
     }
 }
